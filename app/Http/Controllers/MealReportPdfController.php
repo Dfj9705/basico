@@ -19,6 +19,7 @@ class MealReportPdfController extends Controller
 
         $records = User::query()
             ->leftJoin('grades', 'users.grade_id', '=', 'grades.id')
+            ->leftJoin('weapon_branches', 'users.weapon_branch_id', '=', 'weapon_branches.id')
             ->select('users.*')
             ->with([
                 'grade',
