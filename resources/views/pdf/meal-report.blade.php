@@ -53,52 +53,53 @@
             Semana del {{ $weekStart->format('d/m/Y') }} al {{ $weekEnd->format('d/m/Y') }}
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Catálogo</th>
-                    <th>Grado</th>
-                    <th>Arma</th>
-                    <th>Nombre</th>
-                    <th>Lunes</th>
-                    <th>Martes</th>
-                    <th>Miércoles</th>
-                    <th>Jueves</th>
-                    <th>Viernes</th>
-                </tr>
-            </thead>
+        @for ($i = 0; $i < 5; $i++)
+            @php
+                $currentDate = $weekStart->copy()->addDays($i);
+                $dayName = ucfirst($currentDate->locale('es')->translatedFormat('l'));
+            @endphp
 
-            <tbody>
-                @forelse ($records as $record)
+            <h3>{{ $dayName }} {{ $currentDate->format('d/m/Y') }}</h3>
+
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ $record?->catalog_number ?? '-' }}</td>
-                        <td>{{ $record?->grade?->name ?? '-' }}</td>
-                        <td>{{ $record?->weaponBranch?->name ?? '-' }}</td>
-                        <td>{{ $record?->name }}</td>
-
-                        @for ($i = 0; $i < 5; $i++)
-                            @php
-                                $date = $weekStart->copy()->addDays($i)->toDateString();
-
-                                $meal = $record->mealAttendances->first(function ($meal) use ($date) {
-                                    return \Carbon\Carbon::parse($meal->date)->toDateString() === $date;
-                                });
-                            @endphp
-
-                            <td class="center small">
-                                {{ $meal && ($meal->breakfast || $meal->lunch || $meal->dinner) ? 'Sí' : 'No' }}
-                            </td>
-                        @endfor
+                        <th>Catálogo</th>
+                        <th>Grado</th>
+                        <th>Arma</th>
+                        <th>Nombre</th>
+                        <th>Desayuno</th>
+                        <th>Almuerzo</th>
+                        <th>Cena</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="9" class="center">
-                            No hay usuarios para mostrar.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    @foreach ($records as $record)
+                        @php
+                            $meal = $record->mealAttendances->first(function ($item) use ($currentDate) {
+                                return \Carbon\Carbon::parse($item->date)->toDateString()
+                                    === $currentDate->toDateString();
+                            });
+                        @endphp
+
+                        <tr>
+                            <td>{{ $record?->catalog_number ?? '-' }}</td>
+                            <td>{{ $record?->grade?->name ?? '-' }}</td>
+                            <td>{{ $record?->weaponBranch?->name ?? '-' }}</td>
+                            <td>{{ $record?->name }}</td>
+                            <td class="center">{{ $meal?->breakfast ? 'Sí' : 'No' }}</td>
+                            <td class="center">{{ $meal?->lunch ? 'Sí' : 'No' }}</td>
+                            <td class="center">{{ $meal?->dinner ? 'Sí' : 'No' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            @if ($i < 4)
+                <pagebreak />
+            @endif
+        @endfor
     </body>
 
 </html>

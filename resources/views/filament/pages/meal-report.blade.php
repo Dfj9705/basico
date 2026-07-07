@@ -38,16 +38,48 @@
 
                         @for ($i = 0; $i < 5; $i++)
                             @php
-                                $date = $weekStart->copy()->addDays($i)->toDateString();
-
-                                $meal = $record->mealAttendances->first(function ($meal) use ($date) {
-                                    return \Carbon\Carbon::parse($meal->date)->toDateString() === $date;
-                                });
+                                $currentDate = $weekStart->copy()->addDays($i);
                             @endphp
 
-                            <td class="px-4 py-2 text-center">
-                                {{ $meal && ($meal->breakfast || $meal->lunch || $meal->dinner) ? 'Sí' : 'No' }}
-                            </td>
+                            <h3 class="mt-6 mb-2 font-bold">
+                                {{ ucfirst($currentDate->locale('es')->translatedFormat('l')) }}
+                                {{ $currentDate->format('d/m/Y') }}
+                            </h3>
+
+                            <table class="w-full text-sm border">
+                                <thead>
+                                    <tr>
+                                        <th>Catálogo</th>
+                                        <th>Grado</th>
+                                        <th>Arma</th>
+                                        <th>Nombre</th>
+                                        <th>Desayuno</th>
+                                        <th>Almuerzo</th>
+                                        <th>Cena</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach ($this->getRecords() as $record)
+                                        @php
+                                            $meal = $record->mealAttendances->first(function ($item) use ($currentDate) {
+                                                return \Carbon\Carbon::parse($item->date)->toDateString()
+                                                    === $currentDate->toDateString();
+                                            });
+                                        @endphp
+
+                                        <tr>
+                                            <td>{{ $record?->catalog_number ?? '-' }}</td>
+                                            <td>{{ $record?->grade?->name ?? '-' }}</td>
+                                            <td>{{ $record?->weaponBranch?->name ?? '-' }}</td>
+                                            <td>{{ $record?->name }}</td>
+                                            <td class="text-center">{{ $meal?->breakfast ? 'Sí' : 'No' }}</td>
+                                            <td class="text-center">{{ $meal?->lunch ? 'Sí' : 'No' }}</td>
+                                            <td class="text-center">{{ $meal?->dinner ? 'Sí' : 'No' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         @endfor
                     </tr>
                 @empty
