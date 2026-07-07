@@ -29,13 +29,13 @@ class CreateMealAttendance extends CreateRecord
         $limitDate = $mealDate
             ->copy()
             ->startOfWeek(Carbon::MONDAY)
-            ->subDays(4)          // Jueves de la semana anterior
+            ->subDays(5)          // Miercoles de la semana anterior
             ->setTime(12, 0, 0);  // 12:00:00 p.m.
 
         if (now()->greaterThan($limitDate)) {
             Notification::make()
                 ->title('Error')
-                ->body('El plazo para registrar comidas de esa semana finalizó el jueves anterior a las 12:00 p.m.')
+                ->body('El plazo para registrar comidas de esa semana finalizó el miércoles anterior a las 12:00 p.m.')
                 ->danger()
                 ->send();
 
