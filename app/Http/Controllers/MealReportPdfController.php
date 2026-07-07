@@ -46,7 +46,8 @@ class MealReportPdfController extends Controller
             'margin_left' => 10,
             'margin_right' => 10,
         ]);
-
+        $mpdf->SetWatermarkImage(public_path('images/eas.png'));
+        $mpdf->showWatermarkImage = true;
         $mpdf->WriteHTML($html);
 
         $filename = 'reporte-alimentacion-semana-' . $weekStart->format('Y-m-d') . '.pdf';
