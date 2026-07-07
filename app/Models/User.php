@@ -3,8 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Filament\Facades\Filament;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -63,5 +66,26 @@ class User extends Authenticatable
     public function weaponBranch()
     {
         return $this->belongsTo(WeaponBranch::class);
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $url = Filament::getPanel('admin')->getResetPasswordUrl($token, $this);
+
+        $this->notify(
+            new class ($url) extends ResetPassword {
+            public function __construct(public string $url)
+            {}
+
+            public function toMail($notifiable): MailMessage
+            {
+                return (new MailMessage)
+                    ->subject('Restablecer contraseña')
+                    ->line('Recibimos una solicitud para restablecer tu contraseña.')
+                    ->action('Restablecer contraseña', $this->url)
+                    ->line('Si no solicitaste este cambio, puedes ignorar este correo.');
+            }
+            }
+        );
     }
 }
