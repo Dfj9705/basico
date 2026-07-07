@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\MealAttendance;
+use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -12,20 +13,34 @@ class MyMealTodayWidget extends BaseWidget
 
     protected function getStats(): array
     {
+        $weekStart = now()
+            ->startOfWeek(Carbon::MONDAY)
+            ->toDateString();
+
+        $weekEnd = now()
+            ->startOfWeek(Carbon::MONDAY)
+            ->addDays(4)
+            ->format('d/m/Y');
+
         $meal = MealAttendance::query()
             ->where('user_id', auth()->id())
-            ->whereDate('date', today())
+            ->whereDate('week_start', $weekStart)
             ->first();
+
+        $description = 'Semana del '
+            . Carbon::parse($weekStart)->format('d/m/Y')
+            . ' al '
+            . $weekEnd;
 
         return [
             Stat::make('Desayuno', $meal?->breakfast ? 'Sí' : 'No')
-                ->description('Alimentación de hoy'),
+                ->description($description),
 
             Stat::make('Almuerzo', $meal?->lunch ? 'Sí' : 'No')
-                ->description('Alimentación de hoy'),
+                ->description($description),
 
             Stat::make('Cena', $meal?->dinner ? 'Sí' : 'No')
-                ->description('Alimentación de hoy'),
+                ->description($description),
         ];
     }
 }
