@@ -13,46 +13,28 @@ class CreateMealAttendance extends CreateRecord
 {
     protected static string $resource = MealAttendanceResource::class;
 
-    protected function handleRecordCreation(array $data): Model
+    protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $weekStart = Carbon::parse($this->form->getState()['week_start'])
-            ->startOfWeek(Carbon::MONDAY);
+        $data['week_start'] = Carbon::parse($data['week_start'])
+            ->startOfWeek(Carbon::MONDAY)
+            ->toDateString();
 
-        $this->validateMealDeadline($weekStart);
+        $data['date'] = $data['week_start'];
 
-        $userId = auth()->user()->hasRole('Administrador')
-            ? $data['user_id']
-            : auth()->id();
-
-        $firstRecord = null;
-
-        for ($day = $weekStart->copy(); $day->lte($weekStart->copy()->addDays(4)); $day->addDay()) {
-            $record = MealAttendance::updateOrCreate(
-                [
-                    'user_id' => $userId,
-                    'date' => $day->toDateString(),
-                ],
-                [
-                    'breakfast' => $data['breakfast'] ?? false,
-                    'lunch' => $data['lunch'] ?? false,
-                    'dinner' => $data['dinner'] ?? false,
-                ]
-            );
-
-            $firstRecord ??= $record;
+        if (!auth()->user()->hasRole('Administrador')) {
+            $data['user_id'] = auth()->id();
         }
 
-        Notification::make()
-            ->title('Semana registrada')
-            ->body('Se guardó la alimentación de lunes a viernes.')
-            ->success()
-            ->send();
+        $this->validateMealDeadline($data);
+        $this->validateExistMealAttendance($data);
 
-        return $firstRecord;
+        return $data;
     }
 
-    protected function validateMealDeadline(Carbon $weekStart): void
+    protected function validateMealDeadline(array $data): void
     {
+        $weekStart = Carbon::parse($data['week_start']);
+
         $limitDate = $weekStart
             ->copy()
             ->subDays(5)
@@ -62,6 +44,23 @@ class CreateMealAttendance extends CreateRecord
             Notification::make()
                 ->title('Error')
                 ->body('El plazo para registrar comidas de esa semana finalizó el miércoles anterior a las 15:00 p.m.')
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
+    }
+
+    protected function validateExistMealAttendance(array $data): void
+    {
+        $exists = MealAttendance::where('user_id', $data['user_id'])
+            ->where('week_start', $data['week_start'])
+            ->exists();
+
+        if ($exists) {
+            Notification::make()
+                ->title('Error')
+                ->body('Ya existe un registro de comidas para esa semana.')
                 ->danger()
                 ->send();
 

@@ -21,11 +21,8 @@ class MealReportPdfController extends Controller
             ->with([
                 'grade',
                 'weaponBranch',
-                'mealAttendances' => function ($query) use ($weekStart, $weekEnd) {
-                    $query->whereBetween('date', [
-                        $weekStart->toDateString(),
-                        $weekEnd->toDateString(),
-                    ]);
+                'mealAttendances' => function ($query) use ($weekStart) {
+                    $query->whereDate('week_start', $weekStart->toDateString());
                 },
             ])
             ->orderBy('catalog_number')
@@ -42,11 +39,11 @@ class MealReportPdfController extends Controller
 
         $mpdf = new Mpdf([
             'format' => 'Letter',
-            'orientation' => 'L',
-            'margin_top' => 12,
-            'margin_bottom' => 12,
-            'margin_left' => 8,
-            'margin_right' => 8,
+            'orientation' => 'P',
+            'margin_top' => 15,
+            'margin_bottom' => 15,
+            'margin_left' => 10,
+            'margin_right' => 10,
         ]);
 
         $mpdf->WriteHTML($html);

@@ -8,6 +8,7 @@ class MealAttendance extends Model
 {
     protected $fillable = [
         'user_id',
+        'week_start',
         'date',
         'breakfast',
         'lunch',
@@ -15,6 +16,7 @@ class MealAttendance extends Model
     ];
 
     protected $casts = [
+        'week_start' => 'date',
         'date' => 'date',
         'breakfast' => 'boolean',
         'lunch' => 'boolean',

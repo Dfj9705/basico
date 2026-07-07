@@ -64,19 +64,15 @@ class MealReport extends Page implements Forms\Contracts\HasForms
     public function getRecords()
     {
         $weekStart = Carbon::parse($this->data['week_start'] ?? now())
-            ->startOfWeek(Carbon::MONDAY);
-
-        $weekEnd = $weekStart->copy()->addDays(4);
+            ->startOfWeek(Carbon::MONDAY)
+            ->toDateString();
 
         return User::query()
             ->with([
                 'grade',
                 'weaponBranch',
-                'mealAttendances' => function ($query) use ($weekStart, $weekEnd) {
-                    $query->whereBetween('date', [
-                        $weekStart->toDateString(),
-                        $weekEnd->toDateString(),
-                    ]);
+                'mealAttendances' => function ($query) use ($weekStart) {
+                    $query->whereDate('week_start', $weekStart);
                 },
             ])
             ->orderBy('catalog_number')

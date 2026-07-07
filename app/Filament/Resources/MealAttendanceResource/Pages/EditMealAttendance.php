@@ -19,68 +19,58 @@ class EditMealAttendance extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
-    protected function mutateFormDataBeforeCreate(array $data): array
+    protected function mutateFormDataBeforeSave(array $data): array
     {
-        $this->validateMealDeadline($data);
-        $this->validateExistMealAttendance($data);
+        $data['week_start'] = Carbon::parse($data['week_start'])
+            ->startOfWeek(Carbon::MONDAY)
+            ->toDateString();
+
+        $data['date'] = $data['week_start'];
 
         if (!auth()->user()->hasRole('Administrador')) {
             $data['user_id'] = auth()->id();
         }
+
+        $this->validateMealDeadline($data);
+        $this->validateExistMealAttendance($data);
+
         return $data;
     }
+
     protected function validateMealDeadline(array $data): void
     {
-        $mealDate = Carbon::parse($data['date']);
+        $weekStart = Carbon::parse($data['week_start']);
 
-        $limitDate = $mealDate
+        $limitDate = $weekStart
             ->copy()
-            ->startOfWeek(Carbon::MONDAY)
-            ->subDays(5)          // Miercoles de la semana anterior
-            ->setTime(15, 0, 0);  // 15:00:00 p.m.
+            ->subDays(5)
+            ->setTime(15, 0, 0);
 
         if (now()->greaterThan($limitDate)) {
             Notification::make()
                 ->title('Error')
-                ->body('El plazo para registrar comidas de esa semana finalizó el miercoles anterior a las 15:00 p.m.')
+                ->body('El plazo para registrar comidas de esa semana finalizó el miércoles anterior a las 15:00 p.m.')
                 ->danger()
                 ->send();
 
             $this->halt();
         }
-
     }
 
     protected function validateExistMealAttendance(array $data): void
     {
-        if (!auth()->user()->hasRole('Administrador')) {
-            $existingAttendance = MealAttendance::where('user_id', auth()->id())
-                ->where('date', $data['date'])
-                ->first();
+        $exists = MealAttendance::where('user_id', $data['user_id'])
+            ->where('week_start', $data['week_start'])
+            ->exists();
 
-            if ($existingAttendance) {
-                Notification::make()
-                    ->title('Error')
-                    ->body('Ya existe un registro de comidas para esa fecha.')
-                    ->danger()
-                    ->send();
+        if ($exists) {
+            Notification::make()
+                ->title('Error')
+                ->body('Ya existe un registro de comidas para esa semana.')
+                ->danger()
+                ->send();
 
-                $this->halt();
-            }
-        } else {
-            $existingAttendance = MealAttendance::where('user_id', $data['user_id'])
-                ->where('date', $data['date'])
-                ->first();
-
-            if ($existingAttendance) {
-                Notification::make()
-                    ->title('Error')
-                    ->body('Ya existe un registro de comidas para esa fecha.')
-                    ->danger()
-                    ->send();
-
-                $this->halt();
-            }
+            $this->halt();
         }
     }
 }

@@ -52,7 +52,7 @@ class MealAttendanceResource extends Resource
                     ->options(function () {
                         $weeks = [];
 
-                        $start = now()->startOfWeek(\Carbon\Carbon::MONDAY);
+                        $start = now()->subMonths(1)->startOfWeek(\Carbon\Carbon::MONDAY);
                         $end = now()->addMonths(2)->startOfWeek(\Carbon\Carbon::MONDAY);
 
                         while ($start->lte($end)) {
@@ -103,9 +103,15 @@ class MealAttendanceResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('date')
-                    ->label('Fecha')
-                    ->date('d/m/Y')
+                TextColumn::make('week_start')
+                    ->label('Semana')
+                    ->formatStateUsing(
+                        fn($state) =>
+                        'Semana del ' .
+                        \Carbon\Carbon::parse($state)->format('d/m/Y') .
+                        ' al ' .
+                        \Carbon\Carbon::parse($state)->addDays(4)->format('d/m/Y')
+                    )
                     ->sortable(),
 
                 IconColumn::make('breakfast')
