@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\MealAttendanceResource\Pages;
 use App\Filament\Resources\MealAttendanceResource\RelationManagers;
 use App\Models\MealAttendance;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -46,11 +47,32 @@ class MealAttendanceResource extends Resource
                     ->hidden(fn() => !auth()->user()->hasRole('Administrador'))
                     ->required(),
 
-                DatePicker::make('date')
-                    ->label('Fecha')
-                    ->default(now())
-                    ->columnSpanFull()
-                    ->required(),
+                Select::make('week_start')
+                    ->label('Semana')
+                    ->options(function () {
+                        $weeks = [];
+
+                        $start = now()->startOfWeek(\Carbon\Carbon::MONDAY);
+                        $end = now()->addMonths(2)->startOfWeek(\Carbon\Carbon::MONDAY);
+
+                        while ($start->lte($end)) {
+                            $monday = $start->copy();
+                            $friday = $start->copy()->addDays(4);
+
+                            $weeks[$monday->toDateString()] = 'Semana del '
+                                . $monday->format('d/m/Y')
+                                . ' al '
+                                . $friday->format('d/m/Y');
+
+                            $start->addWeek();
+                        }
+
+                        return $weeks;
+                    })
+                    ->default(now()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString())
+                    ->searchable()
+                    ->required()
+                    ->columnSpanFull(),
 
                 Toggle::make('breakfast')
                     ->label('Desayuno')
