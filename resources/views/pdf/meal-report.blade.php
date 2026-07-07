@@ -51,6 +51,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>No.</th>
                     <th>Catálogo</th>
                     <th>Grado</th>
                     <th>Arma</th>
@@ -68,6 +69,7 @@
                     @endphp
 
                     <tr>
+                        <td>{{ $loop->iteration }}</td>
                         <td>{{ $record?->catalog_number ?? '-' }}</td>
                         <td>{{ $record?->grade?->name ?? '-' }}</td>
                         <td>{{ $record?->weaponBranch?->name ?? '-' }}</td>
