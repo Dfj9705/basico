@@ -21,9 +21,7 @@ class EditMealAttendance extends EditRecord
     }
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $data['week_start'] = Carbon::parse($data['week_start'])
-            ->startOfWeek(Carbon::MONDAY)
-            ->toDateString();
+        $data['week_start'] = $this->record->week_date;
 
         $data['date'] = $data['week_start'];
 
@@ -57,20 +55,4 @@ class EditMealAttendance extends EditRecord
         }
     }
 
-    protected function validateExistMealAttendance(array $data): void
-    {
-        $exists = MealAttendance::where('user_id', $data['user_id'])
-            ->where('week_start', $data['week_start'])
-            ->exists();
-
-        if ($exists) {
-            Notification::make()
-                ->title('Error')
-                ->body('Ya existe un registro de comidas para esa semana.')
-                ->danger()
-                ->send();
-
-            $this->halt();
-        }
-    }
 }

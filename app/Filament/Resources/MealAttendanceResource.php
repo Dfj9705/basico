@@ -11,8 +11,10 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -49,6 +51,7 @@ class MealAttendanceResource extends Resource
 
                 Select::make('week_start')
                     ->label('Semana')
+                    ->hiddenOn('edit')
                     ->options(function () {
                         $weeks = [];
 
@@ -126,6 +129,26 @@ class MealAttendanceResource extends Resource
                     ->label('Cena')
                     ->boolean(),
             ])
+            ->actions([
+                DeleteAction::make('Eliminar')->before(function (MealAttendance $record) {
+                    $weekStart = Carbon::parse($record->week_start);
+
+                    $limitDate = $weekStart
+                        ->copy()
+                        ->subDays(5)
+                        ->setTime(15, 0, 0);
+
+                    if (now()->greaterThan($limitDate)) {
+                        Notification::make()
+                            ->title('Error')
+                            ->body('El plazo para modificar comidas de esa semana finalizó el miércoles anterior a las 15:00 p.m.')
+                            ->danger()
+                            ->send();
+
+                        $this->halt();
+                    }
+                })
+            ])
             ->filters([
                 SelectFilter::make('user_id')
                     ->label('Usuario')
@@ -170,7 +193,6 @@ class MealAttendanceResource extends Resource
         return [
             'index' => Pages\ListMealAttendances::route('/'),
             'create' => Pages\CreateMealAttendance::route('/create'),
-            'edit' => Pages\EditMealAttendance::route('/{record}/edit'),
         ];
     }
 
