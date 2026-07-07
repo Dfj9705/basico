@@ -44,6 +44,7 @@
                     @endphp
 
                     <tr class="border-t border-gray-200 dark:border-gray-700">
+                        <td class="px-4 py-2">{{ $loop->iteration }}</td>
                         <td class="px-4 py-2">{{ $record?->catalog_number ?? '-' }}</td>
                         <td class="px-4 py-2">{{ $record?->grade?->name ?? '-' }}</td>
                         <td class="px-4 py-2">{{ $record?->weaponBranch?->name ?? '-' }}</td>
