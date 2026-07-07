@@ -27,8 +27,8 @@ class MealReportPdfController extends Controller
                     $query->whereDate('week_start', $weekStart);
                 },
             ])
-            ->orderBy('users.catalog_number')
             ->orderBy('weapon_branches.order')
+            ->orderBy('users.catalog_number')
             ->orderBy('users.name')
             ->get();
 

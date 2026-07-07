@@ -77,8 +77,8 @@ class MealReport extends Page implements Forms\Contracts\HasForms
                     $query->whereDate('week_start', $weekStart);
                 },
             ])
-            ->orderBy('users.catalog_number')
             ->orderBy('weapon_branches.order', 'asc')
+            ->orderBy('users.catalog_number')
             ->orderBy('users.name')
             ->get();
     }
