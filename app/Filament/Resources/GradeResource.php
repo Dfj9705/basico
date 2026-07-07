@@ -30,6 +30,11 @@ class GradeResource extends Resource
                     ->required()
                     ->unique(ignoreRecord: true),
 
+                Forms\Components\TextInput::make('order')
+                    ->label('Orden')
+                    ->numeric()
+                    ->default(0),
+
                 Forms\Components\Toggle::make('is_active')
                     ->label('Activo')
                     ->default(true),
@@ -47,6 +52,10 @@ class GradeResource extends Resource
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Activo')
                     ->boolean(),
+
+                Tables\Columns\TextColumn::make('order')
+                    ->label('Orden')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado el')

@@ -76,8 +76,7 @@ class MealReport extends Page implements Forms\Contracts\HasForms
                 },
             ])
             ->orderBy('catalog_number')
-            ->orderBy('grade_id')
-            ->orderBy('weapon_branch_id')
+            ->orderBy('grade.order', 'asc')
             ->orderBy('name')
             ->get();
     }

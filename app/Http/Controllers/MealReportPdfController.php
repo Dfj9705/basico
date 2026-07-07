@@ -26,8 +26,7 @@ class MealReportPdfController extends Controller
                 },
             ])
             ->orderBy('catalog_number')
-            ->orderBy('grade_id')
-            ->orderBy('weapon_branch_id')
+            ->orderBy('grade.order', 'asc')
             ->orderBy('name')
             ->get();
 

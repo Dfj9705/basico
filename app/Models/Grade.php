@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Grade extends Model
 {
-    protected $fillable = ['name', 'is_active'];
+    protected $fillable = ['name', 'is_active', 'order'];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'order' => 'integer',
     ];
 }
