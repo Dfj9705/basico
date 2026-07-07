@@ -68,6 +68,8 @@ class MealReport extends Page implements Forms\Contracts\HasForms
             ->toDateString();
 
         return User::query()
+            ->leftJoin('grades', 'users.grade_id', '=', 'grades.id')
+            ->select('users.*')
             ->with([
                 'grade',
                 'weaponBranch',
@@ -75,9 +77,10 @@ class MealReport extends Page implements Forms\Contracts\HasForms
                     $query->whereDate('week_start', $weekStart);
                 },
             ])
-            ->orderBy('catalog_number')
-            ->orderBy('grade.order', 'asc')
-            ->orderBy('name')
+            ->orderBy('grades.order')
+            ->orderBy('weapon_branches.order')
+            ->orderBy('users.catalog_number')
+            ->orderBy('users.name')
             ->get();
     }
 

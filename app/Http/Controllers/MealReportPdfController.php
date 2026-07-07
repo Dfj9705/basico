@@ -18,16 +18,19 @@ class MealReportPdfController extends Controller
         $weekEnd = $weekStart->copy()->addDays(4);
 
         $records = User::query()
+            ->leftJoin('grades', 'users.grade_id', '=', 'grades.id')
+            ->select('users.*')
             ->with([
                 'grade',
                 'weaponBranch',
                 'mealAttendances' => function ($query) use ($weekStart) {
-                    $query->whereDate('week_start', $weekStart->toDateString());
+                    $query->whereDate('week_start', $weekStart);
                 },
             ])
-            ->orderBy('catalog_number')
-            ->orderBy('grade.order', 'asc')
-            ->orderBy('name')
+            ->orderBy('grades.order')
+            ->orderBy('weapon_branches.order')
+            ->orderBy('users.catalog_number')
+            ->orderBy('users.name')
             ->get();
 
         $html = view('pdf.meal-report', [
