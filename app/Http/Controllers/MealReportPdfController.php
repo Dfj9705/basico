@@ -18,7 +18,6 @@ class MealReportPdfController extends Controller
         $weekEnd = $weekStart->copy()->addDays(4);
 
         $records = User::query()
-            ->leftJoin('grades', 'users.grade_id', '=', 'grades.id')
             ->leftJoin('weapon_branches', 'users.weapon_branch_id', '=', 'weapon_branches.id')
             ->select('users.*')
             ->with([
@@ -28,7 +27,6 @@ class MealReportPdfController extends Controller
                     $query->whereDate('week_start', $weekStart);
                 },
             ])
-            ->orderBy('grades.order')
             ->orderBy('weapon_branches.order')
             ->orderBy('users.catalog_number')
             ->orderBy('users.name')
