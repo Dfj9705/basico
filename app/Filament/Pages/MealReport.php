@@ -2,8 +2,8 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\MealAttendance;
 use App\Models\User;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
@@ -24,7 +24,7 @@ class MealReport extends Page implements Forms\Contracts\HasForms
     public function mount(): void
     {
         $this->form->fill([
-            'date' => now()->toDateString(),
+            'week_start' => now()->startOfWeek(Carbon::MONDAY)->toDateString(),
         ]);
     }
 
@@ -32,23 +32,51 @@ class MealReport extends Page implements Forms\Contracts\HasForms
     {
         return $form
             ->schema([
-                Forms\Components\DatePicker::make('date')
-                    ->label('Día')
+                Forms\Components\Select::make('week_start')
+                    ->label('Semana')
+                    ->options(function () {
+                        $weeks = [];
+
+                        $start = now()->subMonths(2)->startOfWeek(Carbon::MONDAY);
+                        $end = now()->addMonths(2)->startOfWeek(Carbon::MONDAY);
+
+                        while ($start->lte($end)) {
+                            $monday = $start->copy();
+                            $friday = $start->copy()->addDays(4);
+
+                            $weeks[$monday->toDateString()] = 'Semana del '
+                                . $monday->format('d/m/Y')
+                                . ' al '
+                                . $friday->format('d/m/Y');
+
+                            $start->addWeek();
+                        }
+
+                        return $weeks;
+                    })
+                    ->searchable()
                     ->required()
                     ->live(),
             ])
             ->statePath('data');
     }
 
-
     public function getRecords()
     {
+        $weekStart = Carbon::parse($this->data['week_start'] ?? now())
+            ->startOfWeek(Carbon::MONDAY);
+
+        $weekEnd = $weekStart->copy()->addDays(4);
+
         return User::query()
             ->with([
                 'grade',
                 'weaponBranch',
-                'mealAttendances' => function ($query) {
-                    $query->whereDate('date', $this->data['date'] ?? now());
+                'mealAttendances' => function ($query) use ($weekStart, $weekEnd) {
+                    $query->whereBetween('date', [
+                        $weekStart->toDateString(),
+                        $weekEnd->toDateString(),
+                    ]);
                 },
             ])
             ->orderBy('catalog_number')
@@ -61,7 +89,7 @@ class MealReport extends Page implements Forms\Contracts\HasForms
     public function exportPdf()
     {
         session([
-            'meal_report_date' => $this->data['date'] ?? now()->toDateString(),
+            'meal_report_week_start' => $this->data['week_start'] ?? now()->startOfWeek(Carbon::MONDAY)->toDateString(),
         ]);
 
         return redirect()->route('meal-report.pdf');

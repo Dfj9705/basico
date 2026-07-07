@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MealAttendance;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Mpdf\Mpdf;
 
@@ -11,15 +11,22 @@ class MealReportPdfController extends Controller
 {
     public function download(Request $request)
     {
-        $date = session('meal_report_date', now()->toDateString());
+        $weekStart = Carbon::parse(
+            session('meal_report_week_start', now()->startOfWeek(Carbon::MONDAY)->toDateString())
+        )->startOfWeek(Carbon::MONDAY);
+
+        $weekEnd = $weekStart->copy()->addDays(4);
 
         $records = User::query()
             ->with([
                 'grade',
                 'weaponBranch',
-                'mealAttendances' => function ($query) use ($date) {
-                    $query->whereDate('date', $date);
-                }
+                'mealAttendances' => function ($query) use ($weekStart, $weekEnd) {
+                    $query->whereBetween('date', [
+                        $weekStart->toDateString(),
+                        $weekEnd->toDateString(),
+                    ]);
+                },
             ])
             ->orderBy('catalog_number')
             ->orderBy('grade_id')
@@ -29,22 +36,25 @@ class MealReportPdfController extends Controller
 
         $html = view('pdf.meal-report', [
             'records' => $records,
-            'date' => $date,
+            'weekStart' => $weekStart,
+            'weekEnd' => $weekEnd,
         ])->render();
 
         $mpdf = new Mpdf([
             'format' => 'Letter',
-            'orientation' => 'P',
-            'margin_top' => 15,
-            'margin_bottom' => 15,
-            'margin_left' => 10,
-            'margin_right' => 10,
+            'orientation' => 'L',
+            'margin_top' => 12,
+            'margin_bottom' => 12,
+            'margin_left' => 8,
+            'margin_right' => 8,
         ]);
 
         $mpdf->WriteHTML($html);
 
+        $filename = 'reporte-alimentacion-semana-' . $weekStart->format('Y-m-d') . '.pdf';
+
         return response($mpdf->Output('', 'S'), 200)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="reporte-alimentacion-' . $date . '.pdf"');
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }
