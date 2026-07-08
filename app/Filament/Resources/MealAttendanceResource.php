@@ -72,7 +72,7 @@ class MealAttendanceResource extends Resource
 
                         return $weeks;
                     })
-                    ->default(now()->startOfWeek(\Carbon\Carbon::MONDAY)->toDateString())
+                    ->default(now()->startOfWeek(\Carbon\Carbon::MONDAY)->addWeek()->toDateString())
                     ->searchable()
                     ->required()
                     ->columnSpanFull(),
