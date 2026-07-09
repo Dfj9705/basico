@@ -147,4 +147,24 @@ class ContributionResource extends Resource
             'edit' => Pages\EditContribution::route('/{record}/edit'),
         ];
     }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->can('view_contributions');
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create_contributions');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('update_contributions');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete_contributions');
+    }
 }

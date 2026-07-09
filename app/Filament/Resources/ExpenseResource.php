@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ExpenseResource\Pages;
 use App\Filament\Resources\ExpenseResource\RelationManagers;
+use App\Filament\Resources\ExpenseResource\RelationManagers\SplitsRelationManager;
 use App\Models\Expense;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -90,6 +91,19 @@ class ExpenseResource extends Resource
                     ->label('Fuerza')
                     ->default('General')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('splits')
+                    ->badge()
+                    ->color(function ($record) {
+                        return $record->splits()->count() > 0
+                            ? 'success'
+                            : 'danger';
+                    })
+                    ->state(function ($record) {
+                        return $record->splits()->count() > 0
+                            ? $record->splits()->count() . ' divisiones'
+                            : 'No dividido';
+                    })
+                    ->label('División'),
                 Tables\Columns\TextColumn::make('receipt')
                     ->label('Comprobante')
                     ->icon('heroicon-o-document-text')
@@ -98,6 +112,8 @@ class ExpenseResource extends Resource
                         ? Storage::disk('public')->url($record->receipt)
                         : null)
                     ->openUrlInNewTab(),
+
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -123,7 +139,7 @@ class ExpenseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            SplitsRelationManager::class,
         ];
     }
 
@@ -143,5 +159,25 @@ class ExpenseResource extends Resource
             'create' => Pages\CreateExpense::route('/create'),
             'edit' => Pages\EditExpense::route('/{record}/edit'),
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->can('view_expenses');
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create_expenses');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('update_expenses');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete_expenses');
     }
 }

@@ -30,4 +30,9 @@ class Expense extends Model
     {
         return $this->belongsTo(Force::class);
     }
+
+    public function splits()
+    {
+        return $this->hasMany(ExpenseSplit::class);
+    }
 }
