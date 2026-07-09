@@ -25,6 +25,12 @@ class WeaponBranchResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Select::make('force_id')
+                    ->label('Fuerza')
+                    ->relationship('force', 'name')
+                    ->searchable()
+                    ->preload(),
+
                 Forms\Components\TextInput::make('name')
                     ->label('Nombre')
                     ->required()
@@ -45,6 +51,11 @@ class WeaponBranchResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('force.name')
+                    ->label('Fuerza')
+                    ->searchable()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nombre')
                     ->searchable(),

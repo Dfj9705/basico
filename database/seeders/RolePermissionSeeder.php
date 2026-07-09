@@ -27,8 +27,11 @@ class RolePermissionSeeder extends Seeder
 
             'grades',
             'weapon_branches',
+            'forces',
 
             'meal_attendances',
+            'contributions',
+            'expenses',
         ];
 
         /**
@@ -69,10 +72,26 @@ class RolePermissionSeeder extends Seeder
             'guard_name' => 'web',
         ]);
 
+        $treasurer = Role::firstOrCreate([
+            'name' => 'Tesorero',
+            'guard_name' => 'web',
+        ]);
+
         /**
          * El administrador tiene todos los permisos.
          */
         $admin->syncPermissions($permissions);
+        $treasurer->syncPermissions([
+            'view_contributions',
+            'create_contributions',
+            'update_contributions',
+            'delete_contributions',
+            'view_expenses',
+            'create_expenses',
+            'update_expenses',
+            'delete_expenses',
+
+        ]);
 
         /**
          * El alumno inicia sin permisos administrativos.
