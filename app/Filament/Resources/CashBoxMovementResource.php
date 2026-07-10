@@ -13,6 +13,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class CashBoxMovementResource extends Resource
 {
@@ -188,7 +189,10 @@ class CashBoxMovementResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ])
-            ->bulkActions([]);
+            ->bulkActions([
+                ExportBulkAction::make()
+
+            ]);
     }
 
     public static function getEloquentQuery(): Builder
