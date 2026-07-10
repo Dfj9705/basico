@@ -32,6 +32,7 @@ class RolePermissionSeeder extends Seeder
             'meal_attendances',
             'contributions',
             'expenses',
+            'cash_box_movements',
         ];
 
         /**
@@ -90,7 +91,7 @@ class RolePermissionSeeder extends Seeder
             'create_expenses',
             'update_expenses',
             'delete_expenses',
-
+            'view_cash_box_movements',
         ]);
 
         /**

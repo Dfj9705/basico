@@ -35,7 +35,9 @@ class EditExpense extends EditRecord
                             ->select('users.id')
                             ->get();
                     } else {
-                        $users = User::all()->pluck('id');
+                        $users = User::join('weapon_branches', 'users.weapon_branch_id', '=', 'weapon_branches.id')
+                            ->select('users.id')
+                            ->get();
                     }
 
                     if (count($users) >= 1) {
@@ -93,7 +95,6 @@ class EditExpense extends EditRecord
                     $record->update($form->getState());
                     CashBoxMovement::create([
                         'force_id' => auth()->user()->weaponBranch->force_id,
-                        'user_id' => $record['user_id'],
                         'expense_id' => $record['id'],
                         'quantity' => $record['amount'],
                         'type' => 'egreso',
