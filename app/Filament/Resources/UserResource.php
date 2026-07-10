@@ -76,6 +76,12 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('#')
+                    ->label('#')
+                    ->rowIndex(),
+                Tables\Columns\TextColumn::make('weaponBranch.force.name')
+                    ->label('Fuerza')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('grade.name')
                     ->label('Grado')
                     ->searchable(),
@@ -106,6 +112,23 @@ class UserResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('force_id')
+                    ->label('Fuerza')
+                    ->relationship('weaponBranch.force', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('weaponBranch_id')
+                    ->label('Arma')
+                    ->relationship('weaponBranch', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('grade_id')
+                    ->label('Grado')
+                    ->relationship('grade', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
