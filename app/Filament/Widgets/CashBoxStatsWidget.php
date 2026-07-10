@@ -48,14 +48,18 @@ class CashBoxStatsWidget extends StatsOverviewWidget
             ->where('force_id', $forceId);
 
         $income = (clone $movements)
-            ->whereIn('type', ['ingreso', 'transferencia'])
+            ->whereIn('type', ['ingreso'])
             ->sum('quantity');
 
         $expenses = (clone $movements)
             ->where('type', 'egreso')
             ->sum('quantity');
 
-        $balance = $income - $expenses;
+        $transferences = (clone $movements)
+            ->where('type', 'transferencia')
+            ->sum('quantity');
+
+        $balance = $income + $transferences - $expenses;
 
         return [
             Stat::make(
