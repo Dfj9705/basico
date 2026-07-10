@@ -25,4 +25,9 @@ class ExpenseSplit extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function movements()
+    {
+        return $this->hasMany(CashBoxMovement::class);
+    }
 }

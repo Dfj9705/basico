@@ -16,11 +16,12 @@ class EditExpense extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()->visible(fn($record) => !$record->splits()->whereHas('movements', fn($q) => $q->where('type', 'transferencia'))->exists()),
             Actions\Action::make('split')
                 ->label('Dividir')
                 ->icon('heroicon-o-divide')
                 ->requiresConfirmation()
+                ->visible(fn($record) => !$record->splits()->whereHas('movements', fn($q) => $q->where('type', 'transferencia'))->exists())
                 ->action(function ($record) {
 
                     ExpenseSplit::where('expense_id', $record->id)->delete();
@@ -32,7 +33,7 @@ class EditExpense extends EditRecord
                             ->select('users.id')
                             ->get();
                     } else {
-                        $users = User::all();
+                        $users = User::all()->pluck('id');
                     }
 
                     if (count($users) >= 1) {
@@ -51,10 +52,9 @@ class EditExpense extends EditRecord
                             ->success()
                             ->send();
 
-                        $this->refreshFormData([
-                            'splits',
-                        ]);
-                        $this->dispatch('refresh');
+                        $this->redirect(
+                            ExpenseResource::getUrl('edit', ['record' => $record])
+                        );
                     } else {
                         Notification::make()
                             ->title('No se puede dividir el gasto')

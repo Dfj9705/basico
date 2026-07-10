@@ -7,6 +7,7 @@ use App\Filament\Resources\ExpenseResource\RelationManagers;
 use App\Filament\Resources\ExpenseResource\RelationManagers\SplitsRelationManager;
 use App\Models\Expense;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -30,40 +31,55 @@ class ExpenseResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\DatePicker::make('expense_date')
-                    ->default(now())
-                    ->columnSpanFull()
-                    ->required(),
 
-                Forms\Components\TextInput::make('amount')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('reference')
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('description')
-                    ->required()
-                    ->columnSpanFull()
-                    ->maxLength(255),
-                Forms\Components\Toggle::make('divisible')
-                    ->label('¿Es divisible por fuerza?')
-                    ->required(),
-                Forms\Components\Select::make('force_id')
-                    ->relationship('force', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->default(auth()->user()->weaponBranch->force_id)
-                    ->hidden(fn() => !auth()->user()->hasRole('Administrador')),
+                Section::make('Generales')->columns(2)->schema([
 
-                Forms\Components\FileUpload::make('receipt')
-                    ->label('Comprobante')
-                    ->disk('public')
-                    ->directory('expenses')
-                    ->visibility('public')
-                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf'])
-                    ->maxSize(10240)
-                    ->downloadable()
-                    ->openable()
-                    ->columnSpanFull()
+                    Forms\Components\DatePicker::make('expense_date')
+                        ->label('Fecha')
+                        ->default(now())
+                        ->columnSpanFull()
+                        ->required(),
+
+                    Forms\Components\TextInput::make('amount')
+                        ->label('Monto')
+                        ->required()
+                        ->numeric()
+                        ->disabled(fn($record) => $record
+                            ? $record->splits()
+                                ->whereHas('movements', fn($q) => $q->where('type', 'transferencia'))
+                                ->exists()
+                            : false),
+                    Forms\Components\TextInput::make('reference')
+                        ->label('Referencia')
+                        ->maxLength(255),
+                    Forms\Components\Textarea::make('description')
+                        ->label('Descripción')
+                        ->required()
+                        ->columnSpanFull()
+                        ->maxLength(255),
+                    Forms\Components\Toggle::make('divisible')
+                        ->label('¿Es divisible por fuerza?')
+                        ->required(),
+                    Forms\Components\Select::make('force_id')
+                        ->label('Fuerza')
+                        ->relationship('force', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->default(auth()->user()->weaponBranch->force_id)
+                        ->hidden(fn() => !auth()->user()->hasRole('Administrador')),
+
+                    Forms\Components\FileUpload::make('receipt')
+                        ->label('Comprobante')
+                        ->disk('public')
+                        ->directory('expenses')
+                        ->visibility('public')
+                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf'])
+                        ->maxSize(10240)
+                        ->downloadable()
+                        ->openable()
+                        ->columnSpanFull()
+
+                ]),
             ]);
     }
 
@@ -71,6 +87,7 @@ class ExpenseResource extends Resource
     {
         return $table
             ->columns([
+
                 Tables\Columns\TextColumn::make('expense_date')
                     ->date()
                     ->sortable(),
@@ -104,6 +121,29 @@ class ExpenseResource extends Resource
                             : 'No dividido';
                     })
                     ->label('División'),
+
+                Tables\Columns\TextColumn::make('payments')
+                    ->label('Pagos')
+                    ->badge()
+                    ->state(function ($record) {
+                        $splits = $record->splits()->count();
+
+                        $paid = $record->splits()
+                            ->whereHas('movements', fn($q) => $q->where('type', 'transferencia'))
+                            ->count();
+
+                        return $paid . '/' . $splits;
+                    })
+                    ->color(function ($record) {
+                        $splits = $record->splits();
+                        $paid = $splits
+                            ->whereHas('movements', fn($q) => $q->where('type', 'transferencia'))
+                            ->exists();
+                        return $paid
+                            ? 'success'
+                            : 'danger';
+                    }),
+
                 Tables\Columns\TextColumn::make('receipt')
                     ->label('Comprobante')
                     ->icon('heroicon-o-document-text')
@@ -146,10 +186,10 @@ class ExpenseResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->when(!auth()->user()->hasRole('Administrador'), function ($query) {
-                $query->where('force_id', auth()->user()->weaponBranch->force_id)
-                    ->orWhereNull('force_id');
-            });
+            ->where(fn($query) => auth()->user()->hasRole('Administrador')
+                ? $query
+                : $query->where('force_id', auth()->user()->weaponBranch->force_id)
+                    ->orWhereNull('force_id'));
     }
 
     public static function getPages(): array

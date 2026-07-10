@@ -13,6 +13,7 @@ class CashBoxMovement extends Model
         'type',
         'observation',
         'user_id',
+        'expense_split_id',
     ];
 
     public function force()
@@ -28,5 +29,12 @@ class CashBoxMovement extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public static function getTotalByForce($force_id)
+    {
+        $ingresos = self::where('force_id', $force_id)->whereIn('type', ['ingreso', 'transferencia'])->sum('quantity');
+        $egresos = self::where('force_id', $force_id)->whereIn('type', ['egreso'])->sum('quantity');
+        return $ingresos - $egresos;
     }
 }
