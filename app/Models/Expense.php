@@ -15,6 +15,7 @@ class Expense extends Model
         'divisible',
         'receipt',
         'force_id',
+        'payment_receipt',
     ];
 
     protected $casts = [

@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\ExpenseResource\Pages;
 
 use App\Filament\Resources\ExpenseResource;
+use App\Models\CashBoxMovement;
 use App\Models\ExpenseSplit;
 use App\Models\User;
 use Filament\Actions;
+use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
@@ -62,6 +64,51 @@ class EditExpense extends EditRecord
                             ->danger()
                             ->send();
                     }
+                }),
+            Actions\Action::make('payment_receipt')
+                ->label('Recibo de pago')
+                ->icon('heroicon-o-receipt-refund')
+                ->form([
+                    FileUpload::make('payment_receipt')
+                        ->label('Recibo/Comprobante')
+                        ->directory('expenses/payment_receipts')
+                        ->acceptedFileTypes(['image/png', 'image/jpeg', 'application/pdf'])
+                        ->visibility('public')
+                        ->disk('public')
+                        ->required(),
+                ])
+                ->visible(fn($record) => $record->payment_receipt == null)
+                ->action(function ($record, $form) {
+
+                    $balance = CashBoxMovement::getTotalByForce(auth()->user()->weaponBranch->force_id);
+
+                    if ($balance < $record->amount) {
+                        Notification::make()
+                            ->title('Saldo insuficiente')
+                            ->body('No se puede transferir el gasto porque no hay saldo suficiente')
+                            ->danger()
+                            ->send();
+                        return;
+                    }
+                    $record->update($form->getState());
+                    CashBoxMovement::create([
+                        'force_id' => auth()->user()->weaponBranch->force_id,
+                        'user_id' => $record['user_id'],
+                        'expense_id' => $record['id'],
+                        'quantity' => $record['amount'],
+                        'type' => 'egreso',
+                        'observation' => 'Pago de gasto: ' . $record['description'],
+                    ]);
+
+                    Notification::make()
+                        ->title('Recibo de pago guardado')
+                        ->body('El recibo de pago se ha guardado correctamente')
+                        ->success()
+                        ->send();
+
+                    $this->redirect(
+                        ExpenseResource::getUrl('edit', ['record' => $record])
+                    );
                 }),
         ];
     }

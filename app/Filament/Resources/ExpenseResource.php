@@ -152,6 +152,15 @@ class ExpenseResource extends Resource
                         ? Storage::disk('public')->url($record->receipt)
                         : null)
                     ->openUrlInNewTab(),
+                Tables\Columns\TextColumn::make('payment_receipt')
+                    ->label('Comprobante de pago')
+                    ->icon('heroicon-o-document-text')
+                    ->formatStateUsing(fn(?string $state) => $state ? 'Ver archivo' : 'Sin comprobar')
+                    ->url(fn($record) => $record->payment_receipt
+                        ? Storage::disk('public')->url($record->payment_receipt)
+                        : null)
+
+                    ->openUrlInNewTab(),
 
 
                 Tables\Columns\TextColumn::make('created_at')
