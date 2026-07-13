@@ -7,6 +7,17 @@
         <x-filament::button wire:click="exportPdf" icon="heroicon-o-arrow-down-tray">
             Exportar PDF
         </x-filament::button>
+
+        <x-filament::button tag="button" color="success" type="button" wire:click="exportExcel"
+            wire:loading.attr="disabled" wire:target="exportExcel" icon="heroicon-o-table-cells">
+            <span wire:loading.remove wire:target="exportExcel">
+                Exportar Excel
+            </span>
+
+            <span wire:loading wire:target="exportExcel">
+                Generando...
+            </span>
+        </x-filament::button>
     </div>
 
     @php

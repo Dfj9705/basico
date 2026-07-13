@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             GradeSeeder::class,
             ForcesSeeder::class,
+            TestUsersSeeder::class,
+            ContributionSeeder::class,
         ]);
     }
 }
