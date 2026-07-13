@@ -12,6 +12,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SplitsRelationManager extends RelationManager
@@ -71,7 +72,17 @@ class SplitsRelationManager extends RelationManager
                     Tables\Actions\BulkAction::make('Transferir')
                         ->label('Transferir')
                         ->icon('heroicon-o-arrow-path')
+                        ->fillForm(function (Collection $records): array {
+                            return [
+                                'amount' => $records->sum('amount'),
+                            ];
+                        })
                         ->form([
+                            Forms\Components\TextInput::make('amount')
+                                ->label('Monto')
+                                ->numeric()
+                                ->readOnly(),
+
                             Forms\Components\Select::make('force_id')
                                 ->label('Fuerza')
                                 ->options(
