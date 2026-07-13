@@ -39,8 +39,8 @@ class MealReport extends Page implements Forms\Contracts\HasForms
                     ->options(function () {
                         $weeks = [];
 
-                        $start = now()->subMonths(2)->startOfWeek(Carbon::MONDAY);
-                        $end = now()->addMonths(2)->startOfWeek(Carbon::MONDAY);
+                        $start = now()->startOfWeek(Carbon::MONDAY);
+                        $end = now()->addMonths(6)->startOfWeek(Carbon::MONDAY);
 
                         while ($start->lte($end)) {
                             $monday = $start->copy();
