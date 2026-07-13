@@ -60,9 +60,15 @@
                         <td class="px-4 py-2">{{ $record?->grade?->name ?? '-' }}</td>
                         <td class="px-4 py-2">{{ $record?->weaponBranch?->name ?? '-' }}</td>
                         <td class="px-4 py-2">{{ $record?->name }}</td>
-                        <td class="px-4 py-2 text-center">{{ $meal?->breakfast ? 'Sí' : 'No' }}</td>
-                        <td class="px-4 py-2 text-center">{{ $meal?->lunch ? 'Sí' : 'No' }}</td>
-                        <td class="px-4 py-2 text-center">{{ $meal?->dinner ? 'Sí' : 'No' }}</td>
+                        <td class="px-4 py-2 text-center">
+                            {{ $meal?->breakfast ? '<span style="color: green;">✔</span>' : '<span style="color: red;">✗</span>' }}
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            {{ $meal?->lunch ? '<span style="color: green;">✔</span>' : '<span style="color: red;">✗</span>' }}
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            {{ $meal?->dinner ? '<span style="color: green;">✔</span>' : '<span style="color: red;">✗</span>' }}
+                        </td>
                     </tr>
                 @empty
                     <tr>
