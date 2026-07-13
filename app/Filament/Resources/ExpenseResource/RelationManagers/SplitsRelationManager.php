@@ -74,13 +74,14 @@ class SplitsRelationManager extends RelationManager
                         ->icon('heroicon-o-arrow-path')
                         ->fillForm(function (Collection $records): array {
                             return [
-                                'amount' => $records->sum('amount'),
+                                'amount' => number_format($records->sum('amount'), 2, '.', ''),
                             ];
                         })
                         ->form([
                             Forms\Components\TextInput::make('amount')
                                 ->label('Monto')
                                 ->numeric()
+                                ->step(0.01)
                                 ->readOnly(),
 
                             Forms\Components\Select::make('force_id')
