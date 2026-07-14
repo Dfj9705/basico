@@ -35,10 +35,10 @@
                     </div>
                     <div>
                         <h2 class="text-lg font-bold tracking-tight text-gray-950 dark:text-white">
-                            No tienes turnos programados para hoy
+                            No tienes servicios programados para hoy
                         </h2>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Disfruta de tu jornada o día libre. No tienes ninguna guardia o turno asignado el día de hoy.
+                            Disfruta de tu jornada o día libre. No tienes ningun servicio asignado el día de hoy.
                         </p>
                     </div>
                 @endif
