@@ -28,6 +28,15 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\FileUpload::make('avatar_url')
+                    ->label('Foto de perfil')
+                    ->image()
+                    ->avatar()
+                    ->directory('avatars')
+                    ->visibility('public')
+                    ->imageEditor()
+                    ->columnSpanFull(),
+
                 Forms\Components\Select::make('grade_id')
                     ->label('Grado')
                     ->relationship('grade', 'name')
@@ -79,6 +88,9 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('#')
                     ->label('#')
                     ->rowIndex(),
+                Tables\Columns\ImageColumn::make('avatar_url')
+                    ->label('Foto')
+                    ->circular(),
                 Tables\Columns\TextColumn::make('weaponBranch.force.name')
                     ->label('Fuerza')
                     ->searchable(),

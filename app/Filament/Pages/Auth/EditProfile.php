@@ -5,6 +5,7 @@ namespace App\Filament\Pages\Auth;
 use Filament\Pages\Auth\EditProfile as BaseEditProfile;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
 
 class EditProfile extends BaseEditProfile
 {
@@ -14,6 +15,15 @@ class EditProfile extends BaseEditProfile
             'form' => $this->form(
                 $this->makeForm()
                     ->schema([
+                        FileUpload::make('avatar_url')
+                            ->label('Foto de perfil')
+                            ->image()
+                            ->avatar()
+                            ->directory('avatars')
+                            ->visibility('public')
+                            ->imageEditor()
+                            ->columnSpanFull(),
+
                         $this->getNameFormComponent(),
                         $this->getEmailFormComponent(),
                         $this->getPasswordFormComponent(),
