@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Widgets\MyMealTodayWidget;
+use App\Filament\Widgets\MyShiftTodayWidget;
 use App\Filament\Widgets\UserContributionStatsWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -42,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
+                MyShiftTodayWidget::class,
                 UserContributionStatsWidget::class,
 
                 MyMealTodayWidget::class,
