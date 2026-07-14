@@ -92,7 +92,7 @@
     <body>
 
         <div class="header">
-            <h1>Programación General de Turnos</h1>
+            <h1>Programación General de Servicios</h1>
             <h2>Mes: {{ ucfirst($monthName) }} {{ $year }}</h2>
         </div>
 
