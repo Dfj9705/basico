@@ -95,6 +95,158 @@ class MealReportExcelService
         return new Xlsx($spreadsheet);
     }
 
+
+    public function generateSummary(
+        Carbon $weekStart,
+        Collection $users
+    ): Xlsx {
+        $weekStart = $weekStart
+            ->copy()
+            ->startOfWeek(Carbon::MONDAY);
+
+        $weekEnd = $weekStart
+            ->copy()
+            ->addDays(4);
+
+        $spreadsheet = new Spreadsheet();
+
+        /*
+         * PhpSpreadsheet crea una hoja automáticamente.
+         * La reutilizamos para desayuno.
+         */
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('CURSO BASICO');
+
+        $sheet->mergeCells('A1:F1');
+        $sheet->setCellValue(
+            'A1',
+            'BASICO PROMOCION LXVIII					'
+        );
+
+        $sheet->getStyle('A1:F1')
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $sheet->getStyle('A1:F1')
+            ->getFont()
+            ->setName('Arial')
+            ->setBold(true);
+
+        $sheet->setCellValue(
+            'A2',
+            'NO.'
+        );
+
+        $sheet->setCellValue(
+            'B2',
+            'GRADO'
+        );
+
+        $sheet->setCellValue(
+            'C2',
+            'NOMBRE'
+        );
+
+        $sheet->setCellValue(
+            'D2',
+            'DESAYUNO'
+        );
+
+        $sheet->setCellValue(
+            'E2',
+            'ALMUERZO'
+        );
+
+        $sheet->setCellValue(
+            'F2',
+            'CENA'
+        );
+
+        $sheet->getStyle('A2:F2')
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $sheet->getStyle('A2:F2')
+            ->getFont()
+            ->setName('Arial')
+            ->setBold(true);
+
+        $sheet->getColumnDimension('A')
+            ->setWidth(4);
+
+        $sheet->getColumnDimension('B')
+            ->setWidth(15);
+
+        $sheet->getColumnDimension('C')
+            ->setWidth(30);
+
+        $sheet->getColumnDimension('D')
+            ->setWidth(15);
+
+        $sheet->getColumnDimension('E')
+            ->setWidth(15);
+
+        $sheet->getColumnDimension('F')
+            ->setWidth(15);
+
+        $count = 3;
+        foreach ($users as $user) {
+            $sheet->setCellValue(
+                'A' . $count,
+                $count
+            );
+
+            $sheet->setCellValue(
+                'B' . $count,
+                $user->grade->name
+            );
+
+            $sheet->setCellValue(
+                'C' . $count,
+                $user->name
+            );
+
+            $sheet->setCellValue(
+                'D' . $count,
+                $user->mealAttendances->first()?->breakfast
+                ? '✓'
+                : ''
+            );
+
+            $sheet->setCellValue(
+                'E' . $count,
+                $user->mealAttendances->first()?->lunch
+                ? '✓'
+                : ''
+            );
+
+            $sheet->setCellValue(
+                'F' . $count,
+                $user->mealAttendances->first()?->dinner
+                ? '✓'
+                : ''
+            );
+
+            $count++;
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+
+
+        $spreadsheet->getProperties()
+            ->setCreator(config('app.name'))
+            ->setTitle('Reporte semanal de alimentación')
+            ->setSubject('Nómina de alimentación')
+            ->setDescription(
+                'Reporte semanal de desayuno, almuerzo y cena.'
+            );
+
+        return new Xlsx($spreadsheet);
+    }
+
     private function filterUsersByMeal(
         Collection $users,
         string $meal

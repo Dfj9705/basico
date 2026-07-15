@@ -18,6 +18,17 @@
                 Generando...
             </span>
         </x-filament::button>
+
+        <x-filament::button tag="button" color="success" type="button" wire:click="exportExcelSummary"
+            wire:loading.attr="disabled" wire:target="exportExcelSummary" icon="heroicon-o-table-cells">
+            <span wire:loading.remove wire:target="exportExcelSummary">
+                Exportar Excel Resumen
+            </span>
+
+            <span wire:loading wire:target="exportExcelSummary">
+                Generando...
+            </span>
+        </x-filament::button>
     </div>
 
     @php

@@ -150,4 +150,43 @@ class MealReport extends Page implements Forms\Contracts\HasForms
         );
     }
 
+    public function exportExcelSummary(
+        MealReportExcelService $excelService
+    ): StreamedResponse {
+        $weekStart = $this->getSelectedWeekStart();
+
+        $users = $this->getRecords();
+
+        $writer = $excelService->generateSummary(
+            weekStart: $weekStart,
+            users: $users,
+        );
+
+        $weekEnd = $weekStart
+            ->copy()
+            ->addDays(4);
+
+        $fileName = sprintf(
+            'nomina-alimentacion-%s-al-%s.xlsx',
+            $weekStart->format('Y-m-d'),
+            $weekEnd->format('Y-m-d')
+        );
+
+        return response()->streamDownload(
+            function () use ($writer): void {
+                $writer->save('php://output');
+            },
+            $fileName,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+
+                'Cache-Control' =>
+                    'max-age=0, no-cache, no-store, must-revalidate',
+
+                'Pragma' => 'public',
+            ]
+        );
+    }
+
 }
