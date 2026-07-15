@@ -195,7 +195,7 @@ class MealReportExcelService
         foreach ($users as $user) {
             $sheet->setCellValue(
                 'A' . $count,
-                $count
+                $count - 2
             );
 
             $sheet->setCellValue(
